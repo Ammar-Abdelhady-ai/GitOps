@@ -2,70 +2,73 @@
 
 ## End to End GitOps Project
 
-This repository contains the Terraform code to maintain VPC and EKS for the vProfile project. This `stage` branch is used for testing and staging changes before they are merged into the `main` branch.
+This repository contains the Terraform code to maintain VPC and EKS for the vProfile project. The `stage` branch is used for testing and staging changes before they are merged into the `main` branch.
 
 ## Table of Contents
 
 1. [Project Overview](#project-overview)
 2. [Tools Required](#tools-required)
 3. [Installation](#installation)
-4. [Usage](#usage)
-5. [Contributing](#contributing)
-6. [License](#license)
-7. [Contact](#contact)
+4. [Branch Workflow](#branch-workflow)
+5. [Terraform State Management](#terraform-state-management)
+6. [Usage](#usage)
+7. [Destroying Infrastructure](#destroying-infrastructure)
+8. [Contributing](#contributing)
+9. [License](#license)
+10. [Contact](#contact)
 
 ## Project Overview
 
 The purpose of this project is to demonstrate an end-to-end GitOps workflow using Terraform to manage infrastructure for the vProfile project. GitOps enables continuous deployment for cloud infrastructure by using Git as the single source of truth for declarative infrastructure and applications.
 
+The `stage` branch is specifically used for:
+- Testing new features and updates.
+- Staging changes before they are merged into the `main` branch.
+- Validating infrastructure changes in an environment similar to production.
+
 ## Tools Required
 
-- Terraform version ~> 1.10.3
+- Terraform version 1.6.3
+- AWS CLI (for managing AWS resources)
 
 ## Installation
 
 To set up the project, ensure you have the required tools listed above installed, then follow these steps:
 
-1. Clone the repository:
+1. Clone the repository and checkout the `stage` branch:
     ```bash
     git clone https://github.com/Ammar-Abdelhady-ai/GitOps.git
     cd GitOps
     git checkout stage
     ```
 
-## Usage
-
-To apply the Terraform configurations, execute the following steps:
-
-1. Initialize the Terraform working directory:
+2. Configure AWS CLI with your credentials:
     ```bash
-    terraform init
+    aws configure
     ```
 
-2. Check the formatting of the Terraform code:
-    ```bash
-    terraform fmt -check
-    ```
+## Branch Workflow
 
-3. Validate the configuration:
-    ```bash
-    terraform validate
-    ```
+The `stage` branch follows a workflow that ensures all changes are thoroughly tested before being merged into the `main` branch. This includes:
+- Code reviews and approvals.
+- Automated testing and validation.
+- Manual testing in a staging environment.
 
-4. Create an execution plan:
-    ```bash
-    terraform plan -out planfile
-    ```
+## Terraform State Management
 
-5. Apply the changes required to reach the desired state of the configuration:
-    ```bash
-    terraform apply -auto-approve -input=false -parallelism=1 planfile
-    ```
+This project uses an S3 bucket to store Terraform state files to enable remote state management and collaboration. Make sure you have an S3 bucket and DynamoDB table set up for state locking.
 
-## Contributing
+### Example Configuration
 
-Contributions are welcome! Please read the [contributing guidelines](CONTRIBUTING.md) before submitting a pull request. Note that changes should be tested in the `stage` branch before being merged into the `main` branch.
+Update the `backend.tf` file with your S3 bucket and DynamoDB table details:
 
-## Contact
-
-For any questions or support, please open an issue in the repository or contact the repository owner .
+```hcl
+terraform {
+  backend "s3" {
+    bucket         = "your-s3-bucket-name"
+    key            = "path/to/terraform.tfstate"
+    region         = "your-aws-region"
+    dynamodb_table = "your-dynamodb-table-name"
+    encrypt        = true
+  }
+}
