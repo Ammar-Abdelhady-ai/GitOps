@@ -1,6 +1,9 @@
 name: "vprofile actions"
 
-on: workflow_dispatch
+on:
+  push:
+    branches:
+      - deployment  # Triggers the workflow on the 'deployment' branch
 
 env:
   AWS_REGION: "us-east-2"
