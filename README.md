@@ -2,17 +2,23 @@
 
 ## End to End GitOps Project
 
-This repository contains the Terraform code to maintain VPC and EKS for the vProfile project.
+This repository contains the Terraform code to maintain VPC and EKS for the vProfile project. The project follows a GitOps workflow to enable continuous deployment for cloud infrastructure by using Git as the single source of truth for declarative infrastructure and applications.
 
 ## Table of Contents
 
 1. [Project Overview](#project-overview)
 2. [Tools Required](#tools-required)
 3. [Installation](#installation)
-4. [Usage](#usage)
-5. [Contributing](#contributing)
-6. [License](#license)
-7. [Contact](#contact)
+4. [Branch Workflows](#branch-workflows)
+    - [Main Branch](#main-branch)
+    - [Stage Branch](#stage-branch)
+    - [Deployment Branch](#deployment-branch)
+5. [Terraform State Management](#terraform-state-management)
+6. [Usage](#usage)
+7. [Destroying Infrastructure](#destroying-infrastructure)
+8. [Contributing](#contributing)
+9. [License](#license)
+10. [Contact](#contact)
 
 ## Project Overview
 
@@ -21,6 +27,10 @@ The purpose of this project is to demonstrate an end-to-end GitOps workflow usin
 ## Tools Required
 
 - Terraform version ~> 1.10.3
+- AWS CLI (for managing AWS resources)
+- JDK 11 (for deployment branch)
+- Maven 3 (for deployment branch)
+- MySQL 8 (for deployment branch)
 
 ## Installation
 
@@ -32,43 +42,69 @@ To set up the project, ensure you have the required tools listed above installed
     cd GitOps
     ```
 
-## Usage
+## Branch Workflows
 
-To apply the Terraform configurations, execute the following steps:
+### Main Branch
 
-1. Initialize the Terraform working directory:
+The `main` branch contains the production-ready code and configurations. It follows the standard GitOps workflow to manage VPC and EKS using Terraform.
+
+### Stage Branch
+
+The `stage` branch is used for testing and staging changes before they are merged into the `main` branch. It ensures that all changes are validated and tested before deployment to production.
+
+### Deployment Branch
+
+The `deployment` branch contains deployment-specific configurations and steps necessary for deploying the project. It includes additional prerequisites and technologies required for deployment.
+
+#### Prerequisites for Deployment Branch
+
+- JDK 11
+- Maven 3
+- MySQL 8
+
+#### Technologies Used in Deployment Branch
+
+- Spring MVC
+- Spring Security
+- Spring Data JPA
+- Maven
+- JSP
+- MySQL
+
+#### Database Setup for Deployment Branch
+
+We use MySQL as the database for this project. Below are the steps to install and set up MySQL on Linux Ubuntu 14.04:
+
+1. Update your package list:
     ```bash
-    terraform init
+    sudo apt-get update
     ```
 
-2. Check the formatting of the Terraform code:
+2. Install MySQL server:
     ```bash
-    terraform fmt -check
+    sudo apt-get install mysql-server
     ```
 
-3. Validate the configuration:
-    ```bash
-    terraform validate
-    ```
+3. Import the database schema:
+    - Locate the `db_backup.sql` file in the `/src/main/resources/` directory.
+    - Import the dump file to the MySQL server:
+   
 
-4. Create an execution plan:
-    ```bash
-    terraform plan -out planfile
-    ```
+## Terraform State Management
 
-5. Apply the changes required to reach the desired state of the configuration:
-    ```bash
-    terraform apply -auto-approve -input=false -parallelism=1 planfile
-    ```
+This project uses an S3 bucket to store Terraform state files to enable remote state management and collaboration. Make sure you have an S3 bucket and DynamoDB table set up for state locking.
 
-## Contributing
+### Example Configuration
 
-Contributions are welcome! Please read the [contributing guidelines](CONTRIBUTING.md) before submitting a pull request.
+Update the `backend.tf` file with your S3 bucket and DynamoDB table details:
 
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
-## Contact
-
-For any questions or support, please open an issue in the repository or contact the repository owner.
+```hcl
+terraform {
+  backend "s3" {
+    bucket         = "your-s3-bucket-name"
+    key            = "path/to/terraform.tfstate"
+    region         = "your-aws-region"
+    dynamodb_table = "your-dynamodb-table-name"
+    encrypt        = true
+  }
+}
