@@ -57,18 +57,3 @@ The `stage` branch follows a workflow that ensures all changes are thoroughly te
 ## Terraform State Management
 
 This project uses an S3 bucket to store Terraform state files to enable remote state management and collaboration. Make sure you have an S3 bucket and DynamoDB table set up for state locking.
-
-### Example Configuration
-
-Update the `backend.tf` file with your S3 bucket and DynamoDB table details:
-
-```hcl
-terraform {
-  backend "s3" {
-    bucket         = "your-s3-bucket-name"
-    key            = "path/to/terraform.tfstate"
-    region         = "your-aws-region"
-    dynamodb_table = "your-dynamodb-table-name"
-    encrypt        = true
-  }
-}
