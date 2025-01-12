@@ -7,7 +7,7 @@ terraform {
 
     random = {
       source  = "hashicorp/random"
-      version = "~> 3.5.1"
+      version = "~> 3.6.2"
     }
 
     tls = {
@@ -27,13 +27,12 @@ terraform {
   }
 
   backend "s3" {
-    bucket = "gitopsterrastate"
+    bucket = "vprofile-tfstate0100"
     key    = "terraform.tfstate"
     region = "us-east-2"
   }
 
-  required_version = "~> 1.6.3"
+  required_version = "~> 1.10.3"
 }
 ##
-##
-##
+## 
