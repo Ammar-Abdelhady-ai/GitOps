@@ -68,4 +68,4 @@ Contributions are welcome! Please read the [contributing guidelines](CONTRIBUTIN
 
 ## Contact
 
-For any questions or support, please open an issue in the repository or contact the repository owner.
+For any questions or support, please open an issue in the repository or contact the repository owner .
