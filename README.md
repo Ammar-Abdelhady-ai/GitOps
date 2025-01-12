@@ -94,3 +94,75 @@ We use MySQL as the database for this project. Below are the steps to install an
 
 This project uses an S3 bucket to store Terraform state files to enable remote state management and collaboration. Make sure you have an S3 bucket and DynamoDB table set up for state locking.
 
+# AWS Resource Cleanup Guide
+
+This guide provides step-by-step instructions for removing all infrastructure and associated resources created by this project. These commands will delete Kubernetes configurations, ingress controllers, Helm deployments, and Terraform-managed resources.
+
+## Steps to Remove Resources
+
+### 1. Delete Kubernetes Configuration
+
+```bash
+rm -rf ~/.kube/config
+```
+- **Purpose**: Removes the local Kubernetes configuration file.
+- **Why Needed**: Clears cached or outdated Kubernetes cluster configurations from your local machine.
+
+### 2. Update Kubernetes Configuration for EKS
+
+```bash
+aws eks update-kubeconfig --region <region-name> --name <eks-cluster-name>  
+```
+- **Purpose**: Reconnects your local system to the EKS cluster.
+- **Why Needed**: Ensures `kubectl` can communicate with the cluster to delete resources.
+
+### 3. Delete the Ingress Controller
+
+```bash
+kubectl delete -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.7.0/deploy/static/provider/aws/deploy.yaml
+```
+- **Purpose**: Deletes the NGINX ingress controller from the EKS cluster.
+- **Why Needed**: Removes the ingress controller used for routing traffic to applications.
+
+### 4. Uninstall the Helm Deployment
+
+```bash
+helm uninstall vprofile-stack
+```
+- **Purpose**: Uninstalls the Helm release named `vprofile-stack`.
+- **Why Needed**: Deletes all resources associated with the Helm chart used for deploying the application.
+
+### 5. Navigate to the Terraform Directory
+
+```bash
+cd terraform/
+```
+- **Purpose**: Changes the directory to the Terraform configuration folder.
+- **Why Needed**: Ensures Terraform commands are executed in the correct directory.
+
+### 6. Reinitialize Terraform
+
+```bash
+terraform init -backend-config="bucket=<s3-bucket-name>" -backend-config="region=<region-name>" -backend-config="key=terraform.tfstate"
+```
+- **Purpose**: Reinitializes Terraform with the backend configuration.
+- **Why Needed**: Ensures Terraform can communicate with the S3 bucket storing the state file.
+
+### 7. Destroy All Terraform-Managed Resources
+
+```bash
+terraform destroy -auto-approve
+```
+- **Purpose**: Deletes all infrastructure resources defined in the Terraform configuration.
+- **Why Needed**: Cleans up AWS resources (e.g., VPCs, EKS clusters, S3 buckets) to avoid incurring unnecessary costs.
+
+## Important Notes
+
+- **Backup State Files**: Before running `terraform destroy`, back up your state file if you need to restore the infrastructure later.
+- **Deletion Confirmation**: Review the resources managed by Terraform to confirm no unintended resources will be destroyed.
+- **Costs**: Removing resources ensures you don't incur costs for unused infrastructure.
+
+By following these steps, you can safely and completely remove all resources related to this project.
+
+
+
