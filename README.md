@@ -165,4 +165,39 @@ terraform destroy -auto-approve
 By following these steps, you can safely and completely remove all resources related to this project.
 
 
+## Repository Secrets Setup for GitHub Actions
+
+This repository uses GitHub Actions to automate tasks like testing, building, and deploying the application. To ensure the workflow runs successfully, you must configure the following repository secrets. These secrets store sensitive information and are used during the workflow execution.
+
+### Required Secrets
+
+| Secret Name           | Purpose                                                                                 | Example Value                                    |
+|-----------------------|-----------------------------------------------------------------------------------------|------------------------------------------------|
+| `AWS_ACCESS_KEY_ID`   | Used to authenticate with AWS services (e.g., ECR, EKS).                                | `AKIAEXAMPLEID`                                |
+| `AWS_SECRET_ACCESS_KEY` | Used alongside the `AWS_ACCESS_KEY_ID` for secure AWS authentication.                 | `wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY`     |
+| `BUCKET_TF_STATE`     | The name of the AWS S3 bucket used to store Terraform state files.                      | `my-terraform-bucket`                          |
+| `REGISTRY`            | The AWS ECR registry URL where Docker images are stored.                               | `123456789012.dkr.ecr.us-east-1.amazonaws.com` |
+| `SONAR_ORGANIZATION`  | Identifies the organization in SonarCloud where the project is hosted.                  | `my-sonar-org`                                 |
+| `SONAR_PROJECT_KEY`   | The unique key of your SonarCloud project.                                              | `vproapp0100`                                  |
+| `SONAR_TOKEN`         | Authentication token for accessing SonarCloud services.                                 | `a12b34c56d78e9f01g2h34i567j89k01`            |
+| `SONAR_URL`           | The base URL for SonarCloud.                                                           | `https://sonarcloud.io`                        |
+
+### How to Add Secrets to Your Repository
+
+Follow these steps to configure the secrets:
+
+1. Go to your GitHub repository.
+2. Navigate to **Settings** > **Secrets and variables** > **Actions**.
+3. Click **New repository secret** for each secret listed above.
+4. Enter the **Name** (e.g., `AWS_ACCESS_KEY_ID`) and its corresponding **Value**.
+5. Save the secret.
+
+### Note for Collaborators
+
+If you fork or clone this repository, ensure that you add the above secrets to your forked repository to successfully run the workflows. Without these secrets, the workflow will fail during execution. Each secret must be set up with valid credentials or tokens specific to your environment.
+
+For more details about setting up secrets in GitHub Actions, refer to the [official GitHub documentation](https://docs.github.com/en/actions/security-guides/encrypted-secrets).
+
+
+
 
