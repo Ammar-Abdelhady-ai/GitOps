@@ -1,126 +1,66 @@
-# Prerequisites
-######
-- JDK 11
-- Maven 3
-- MySQL 8 
-
-# Technologies 
-- Spring MVC
-- Spring Security
-- Spring Data JPA
-- Maven
-- JSP
-- MySQL
-# Database
-Here,we used Mysql DB 
-MSQL DB Installation Steps for Linux ubuntu 14.04:
-- $ sudo apt-get update
-- $ sudo apt-get install mysql-server
-
-Then look for the file :
-- /src/main/resources/db_backup.sql
-- db_backup.sql file is a mysql dump file.we have to import this dump to mysql db server
 # GitOps Project (Deployment Branch)
 
 ## End to End GitOps Project
 
-This repository contains the Terraform code to maintain VPC and EKS for the vProfile project. This `deployment` branch is used for the deployment configurations and steps necessary for deploying the project.
+This repository contains the Terraform code to maintain VPC and EKS for the vProfile project. The `deployment` branch is used for deployment-specific configurations and steps necessary for deploying the project.
 
 ## Table of Contents
 
 1. [Project Overview](#project-overview)
-2. [Prerequisites](#prerequisites)
-3. [Technologies Used](#technologies-used)
-4. [Database Setup](#database-setup)
-5. [Installation](#installation)
-6. [Usage](#usage)
-7. [Contributing](#contributing)
-8. [License](#license)
-9. [Contact](#contact)
+2. [Tools and Prerequisites](#tools-and-prerequisites)
+3. [Installation](#installation)
+4. [Branch Workflow](#branch-workflow)
+5. [Terraform State Management](#terraform-state-management)
+6. [Deployment Overview](#deployment-overview)
+7. [Why Use Helm in Kubernetes](#why-use-helm-in-kubernetes)
+8. [Usage](#usage)
+9. [Destroying Infrastructure](#destroying-infrastructure)
+10. [Contributing](#contributing)
+11. [License](#license)
+12. [Contact](#contact)
 
 ## Project Overview
 
 The purpose of this project is to demonstrate an end-to-end GitOps workflow using Terraform to manage infrastructure for the vProfile project. GitOps enables continuous deployment for cloud infrastructure by using Git as the single source of truth for declarative infrastructure and applications.
 
-## Prerequisites
+The `deployment` branch is specifically used for:
+- Deploying the application to production environments.
+- Managing deployment-specific configurations and scripts.
+- Ensuring a smooth and efficient deployment process.
 
-- JDK 11
-- Maven 3
-- MySQL 8
+## Tools and Prerequisites
 
-## Technologies Used
-
-- Spring MVC
-- Spring Security
-- Spring Data JPA
-- Maven
-- JSP
-- MySQL
-
-## Database Setup
-
-We use MySQL as the database for this project. Below are the steps to install and set up MySQL on Linux Ubuntu 14.04:
-
-1. Update your package list:
-    ```bash
-    sudo apt-get update
-    ```
-
-2. Install MySQL server:
-    ```bash
-    sudo apt-get install mysql-server
-    ```
-
-3. Import the database schema:
-    - Locate the `db_backup.sql` file in the `/src/main/resources/` directory.
-    - Import the dump file to the MySQL server:
-        ```bash
-        mysql -u <user_name> -p accounts < /src/main/resources/db_backup.sql
-        ```
+- Terraform version 1.6.3
+- AWS CLI (for managing AWS resources)
+- Helm (for Kubernetes package management)
+- Kubernetes CLI (kubectl)
+- JDK 11 (for application deployment)
+- Maven 3 (for application deployment)
+- MySQL 8 (for application deployment)
 
 ## Installation
 
 To set up the project, ensure you have the required tools listed above installed, then follow these steps:
 
-1. Clone the repository:
+1. Clone the repository and checkout the `deployment` branch:
     ```bash
     git clone https://github.com/Ammar-Abdelhady-ai/GitOps.git
     cd GitOps
     git checkout deployment
     ```
 
-## Usage
-
-To apply the Terraform configurations, execute the following steps:
-
-1. Initialize the Terraform working directory:
+2. Configure AWS CLI with your credentials:
     ```bash
-    terraform init
+    aws configure
     ```
 
-2. Check the formatting of the Terraform code:
-    ```bash
-    terraform fmt -check
-    ```
+## Branch Workflow
 
-3. Validate the configuration:
-    ```bash
-    terraform validate
-    ```
+The `deployment` branch follows a workflow that ensures all deployment configurations and scripts are properly managed and tested. This includes:
+- Code reviews and approvals.
+- Automated testing and validation.
+- Manual testing in a deployment environment.
 
-4. Create an execution plan:
-    ```bash
-    terraform plan -out planfile
-    ```
+## Terraform State Management
 
-5. Apply the changes required to reach the desired state of the configuration:
-    ```bash
-    terraform apply -auto-approve -input=false -parallelism=1 planfile
-    ```
-
-## Contributing
-
-Contributions are welcome! Please read the [contributing guidelines](CONTRIBUTING.md) before submitting a pull request. Note that deployment-specific changes should be tested in the `deployment` branch before being merged into the `main` branch.
-## Contact
-
-For any questions or support, please open an issue in the repository or contact the repository owner.
+This project uses an S3 bucket to store Terraform state files to enable remote state management and collaboration. Make sure you have an S3 bucket and DynamoDB table set up for state locking.
