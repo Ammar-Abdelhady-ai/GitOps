@@ -1,203 +1,524 @@
-# GitOps Project
+# 🚀 GitOps Infrastructure Automation Project
 
-## End to End GitOps Project
+<div align="center">
 
-This repository contains the Terraform code to maintain VPC and EKS for the vProfile project. The project follows a GitOps workflow to enable continuous deployment for cloud infrastructure by using Git as the single source of truth for declarative infrastructure and applications.
+![AWS](https://img.shields.io/badge/AWS-FF9900?style=for-the-badge&logo=amazon-aws&logoColor=white)
+![Terraform](https://img.shields.io/badge/Terraform-7B42BC?style=for-the-badge&logo=terraform&logoColor=white)
+![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white)
+![EKS](https://img.shields.io/badge/Amazon_EKS-FF9900?style=for-the-badge&logo=amazon-eks&logoColor=white)
+![GitOps](https://img.shields.io/badge/GitOps-100000?style=for-the-badge&logo=git&logoColor=white)
+![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=github-actions&logoColor=white)
 
-## Table of Contents
+**Enterprise-Grade Infrastructure as Code for AWS EKS Deployment**
 
-1. [Project Overview](#project-overview)
-2. [Tools Required](#tools-required)
-3. [Installation](#installation)
-4. [Branch Workflows](#branch-workflows)
-    - [Main Branch](#main-branch)
-    - [Stage Branch](#stage-branch)
-    - [Deployment Branch](#deployment-branch)
-5. [Terraform State Management](#terraform-state-management)
-6. [Usage](#usage)
-7. [Destroying Infrastructure](#destroying-infrastructure)
-8. [Contributing](#contributing)
-9. [License](#license)
-10. [Contact](#contact)
+[Repository](https://github.com/Ammar-Abdelhady-ai/GitOps) • [Issues](https://github.com/Ammar-Abdelhady-ai/GitOps/issues) • [Wiki](https://github.com/Ammar-Abdelhady-ai/GitOps/wiki)
 
-## Project Overview
+</div>
 
-The purpose of this project is to demonstrate an end-to-end GitOps workflow using Terraform to manage infrastructure for the vProfile project. GitOps enables continuous deployment for cloud infrastructure by using Git as the single source of truth for declarative infrastructure and applications.
+---
 
-## Tools Required
+## 📋 Table of Contents
 
-- Terraform version ~> 1.10.3
-- AWS CLI (for managing AWS resources)
-- JDK 11 (for deployment branch)
-- Maven 3 (for deployment branch)
-- MySQL 8 (for deployment branch)
+- [Overview](#-overview)
+- [Key Features](#-key-features)
+- [Architecture](#-architecture)
+- [Technology Stack](#-technology-stack)
+- [Branch Strategy](#-branch-strategy)
+- [Prerequisites](#-prerequisites)
+- [Quick Start](#-quick-start)
+- [Infrastructure Components](#-infrastructure-components)
+- [Terraform State Management](#-terraform-state-management)
+- [CI/CD Integration](#-cicd-integration)
+- [Resource Cleanup](#-resource-cleanup)
+- [GitHub Secrets Configuration](#-github-secrets-configuration)
+- [Troubleshooting](#-troubleshooting)
+- [Contributing](#-contributing)
+- [License](#-license)
 
-## Installation
+---
 
-To set up the project, ensure you have the required tools listed above installed, then follow these steps:
+## 🎯 Overview
 
-1. Clone the repository:
-    ```bash
-    git clone https://github.com/Ammar-Abdelhady-ai/GitOps.git
-    cd GitOps
-    ```
+This repository demonstrates a **production-ready GitOps workflow** for managing cloud infrastructure using Infrastructure as Code (IaC) principles. The project showcases automated provisioning of AWS Virtual Private Cloud (VPC) and Amazon Elastic Kubernetes Service (EKS) clusters using Terraform, with Git as the single source of truth.
 
-## Branch Workflows
+### **Project Highlights**
 
-### Main Branch
+✨ **Infrastructure as Code**: Fully automated AWS infrastructure provisioning with Terraform
+🔄 **GitOps Workflow**: Git-driven infrastructure deployment and version control
+☁️ **Cloud-Native Architecture**: Production-grade EKS cluster with custom VPC configuration
+🔐 **Secure by Design**: Private subnets, security groups, and IAM role management
+📦 **Remote State Management**: S3 backend with DynamoDB state locking
+🚀 **Multi-Environment Support**: Separate branches for development, staging, and production
+🎛️ **Automated CI/CD**: GitHub Actions integration for infrastructure validation
 
-The `main` branch contains the production-ready code and configurations. It follows the standard GitOps workflow to manage VPC and EKS using Terraform.
+---
 
-### Stage Branch
+## ✨ Key Features
 
-The `stage` branch is used for testing and staging changes before they are merged into the `main` branch. It ensures that all changes are validated and tested before deployment to production.
+- **🏗️ Complete VPC Setup**: Custom VPC with public/private subnets across multiple availability zones
+- **⚙️ EKS Cluster Provisioning**: Fully managed Kubernetes cluster with node groups
+- **🔒 Security Best Practices**: IAM roles, security groups, and network policies
+- **📊 Infrastructure Observability**: Comprehensive outputs for resource verification
+- **🔄 Idempotent Deployments**: Consistent infrastructure state management
+- **🌐 Multi-AZ High Availability**: Fault-tolerant infrastructure across availability zones
+- **📈 Scalable Architecture**: Auto-scaling node groups for dynamic workloads
 
-### Deployment Branch
+---
 
-The `deployment` branch contains deployment-specific configurations and steps necessary for deploying the project. It includes additional prerequisites and technologies required for deployment.
+## 🏛️ Architecture
 
-#### Prerequisites for Deployment Branch
+```mermaid
+graph TB
+    subgraph "AWS Cloud"
+        subgraph "VPC"
+            subgraph "Public Subnets"
+                NAT[NAT Gateway]
+                IGW[Internet Gateway]
+            end
+            
+            subgraph "Private Subnets - AZ1"
+                EKS1[EKS Worker Nodes]
+            end
+            
+            subgraph "Private Subnets - AZ2"
+                EKS2[EKS Worker Nodes]
+            end
+            
+            CP[EKS Control Plane]
+        end
+        
+        S3[(S3 Bucket<br/>Terraform State)]
+        DDB[(DynamoDB<br/>State Lock)]
+    end
+    
+    Dev[Developer] -->|git push| GitHub[GitHub Repository]
+    GitHub -->|GitHub Actions| TF[Terraform Apply]
+    TF -->|Read/Write State| S3
+    TF -->|State Locking| DDB
+    TF -->|Provision| CP
+    CP -->|Manage| EKS1
+    CP -->|Manage| EKS2
+    EKS1 & EKS2 -->|Internet Access| NAT
+    NAT -->|Route| IGW
+    
+    style CP fill:#FF9900
+    style S3 fill:#569A31
+    style DDB fill:#527FFF
+    style GitHub fill:#181717
+```
 
-- JDK 11
-- Maven 3
-- MySQL 8
+### **Infrastructure Flow**
 
-#### Technologies Used in Deployment Branch
+1. **Developer** pushes infrastructure code to GitHub repository
+2. **GitHub Actions** validates Terraform configurations
+3. **Terraform** provisions/updates AWS resources
+4. **State Management** ensures consistent infrastructure state via S3/DynamoDB
+5. **EKS Cluster** deployed across multiple availability zones for high availability
 
-- Spring MVC
-- Spring Security
-- Spring Data JPA
-- Maven
-- JSP
-- MySQL
+---
 
-#### Database Setup for Deployment Branch
+## 🛠️ Technology Stack
 
-We use MySQL as the database for this project. Below are the steps to install and set up MySQL on Linux Ubuntu 14.04:
+| Category | Technology | Purpose |
+|----------|-----------|---------|
+| **IaC Tool** | Terraform ~> 1.10.3 | Infrastructure provisioning and management |
+| **Cloud Provider** | AWS | Cloud infrastructure platform |
+| **Container Orchestration** | Amazon EKS | Managed Kubernetes service |
+| **Networking** | AWS VPC | Virtual private cloud networking |
+| **State Backend** | S3 + DynamoDB | Remote state storage and locking |
+| **CI/CD** | GitHub Actions | Automated workflows and validation |
+| **Version Control** | Git | Source code management |
 
-1. Update your package list:
-    ```bash
-    sudo apt-get update
-    ```
+---
 
-2. Install MySQL server:
-    ```bash
-    sudo apt-get install mysql-server
-    ```
+## 🌿 Branch Strategy
 
-3. Import the database schema:
-    - Locate the `db_backup.sql` file in the `/src/main/resources/` directory.
-    - Import the dump file to the MySQL server:
-   
+This repository implements a **GitOps-driven** multi-branch strategy:
 
-## Terraform State Management
+### **📌 Main Branch** (Current)
+- **Purpose**: Production-ready infrastructure code
+- **Content**: Terraform modules for VPC and EKS provisioning
+- **Deployment**: Automated via approved pull requests
+- **Protection**: Branch protection rules enabled
 
-This project uses an S3 bucket to store Terraform state files to enable remote state management and collaboration. Make sure you have an S3 bucket and DynamoDB table set up for state locking.
+### **🧪 Stage Branch**
+- **Purpose**: Pre-production testing and validation
+- **Content**: Infrastructure configurations for staging environment
+- **Workflow**: Testing ground before merging to main
 
-# AWS Resource Cleanup Guide
+### **🚀 Deployment Branch**
+- **Purpose**: Application deployment configurations
+- **Content**: Kubernetes manifests, Helm charts, Ansible playbooks, CI/CD pipelines
+- **Technologies**: Docker, Kubernetes, Helm, Ansible, Jenkins, SonarQube
 
-This guide provides step-by-step instructions for removing all infrastructure and associated resources created by this project. These commands will delete Kubernetes configurations, ingress controllers, Helm deployments, and Terraform-managed resources.
+---
 
-## Steps to Remove Resources
+## ✅ Prerequisites
 
-### 1. Delete Kubernetes Configuration
+Before getting started, ensure you have the following tools installed:
+
+- **Terraform** >= 1.10.3 ([Download](https://www.terraform.io/downloads.html))
+- **AWS CLI** >= 2.0 ([Installation Guide](https://aws.amazon.com/cli/))
+- **kubectl** >= 1.28 ([Installation Guide](https://kubernetes.io/docs/tasks/tools/))
+- **Git** >= 2.0
+- **AWS Account** with appropriate IAM permissions
+
+### **Required AWS Permissions**
+
+Your AWS user/role must have permissions to create:
+- VPC, Subnets, Route Tables, Internet Gateways, NAT Gateways
+- EKS Clusters, Node Groups
+- IAM Roles and Policies
+- Security Groups
+- S3 Buckets (for state management)
+- DynamoDB Tables (for state locking)
+
+---
+
+## 🚀 Quick Start
+
+### **1. Clone the Repository**
+
+```bash
+git clone https://github.com/Ammar-Abdelhady-ai/GitOps.git
+cd GitOps
+```
+
+### **2. Configure AWS Credentials**
+
+```bash
+aws configure
+# Enter your AWS Access Key ID
+# Enter your AWS Secret Access Key
+# Enter your default region (e.g., us-east-2)
+# Enter your preferred output format (json)
+```
+
+### **3. Initialize Terraform Backend**
+
+```bash
+cd terraform/
+
+# Initialize with your S3 backend configuration
+terraform init \
+  -backend-config="bucket=<your-s3-bucket-name>" \
+  -backend-config="region=<your-aws-region>" \
+  -backend-config="key=terraform.tfstate"
+```
+
+> **Note**: Replace placeholders with your actual values
+
+### **4. Review Infrastructure Plan**
+
+```bash
+terraform plan
+```
+
+### **5. Deploy Infrastructure**
+
+```bash
+terraform apply -auto-approve
+```
+
+### **6. Configure kubectl for EKS**
+
+```bash
+aws eks update-kubeconfig --region <region-name> --name <eks-cluster-name>
+```
+
+### **7. Verify Cluster Access**
+
+```bash
+kubectl get nodes
+kubectl get namespaces
+```
+
+---
+
+## 🏗️ Infrastructure Components
+
+### **VPC Configuration**
+
+The Terraform code provisions a complete VPC with:
+
+- **CIDR Block**: Configurable IP range
+- **Public Subnets**: For NAT Gateways and Load Balancers (2 AZs)
+- **Private Subnets**: For EKS worker nodes (2 AZs)
+- **Internet Gateway**: Public internet access
+- **NAT Gateways**: Outbound internet for private subnets
+- **Route Tables**: Public and private routing configurations
+- **Security Groups**: Network security policies
+
+### **EKS Cluster**
+
+- **Kubernetes Version**: Latest stable version
+- **Node Groups**: Auto-scaling worker nodes
+- **Instance Types**: Configurable (t3.medium, t3.large, etc.)
+- **Networking**: Uses VPC CNI plugin
+- **Add-ons**: CoreDNS, kube-proxy, VPC CNI
+- **IAM Integration**: IRSA (IAM Roles for Service Accounts)
+
+### **Terraform Modules**
+
+| File | Description |
+|------|-------------|
+| `main.tf` | Main Terraform configuration and provider setup |
+| `vpc.tf` | VPC, subnets, gateways, and routing configuration |
+| `eks-cluster.tf` | EKS cluster, node groups, and IAM roles |
+| `variables.tf` | Input variables and defaults |
+| `outputs.tf` | Output values for resource verification |
+| `terraform.tf` | Terraform version and backend configuration |
+
+---
+
+## 💾 Terraform State Management
+
+This project uses **remote state management** for collaboration and consistency.
+
+### **Backend Configuration**
+
+- **Storage**: AWS S3 bucket
+- **Locking**: DynamoDB table for state locking
+- **Encryption**: Server-side encryption enabled
+- **Versioning**: S3 bucket versioning enabled for state recovery
+
+### **State File Structure**
+
+```
+s3://<bucket-name>/terraform.tfstate
+```
+
+### **Benefits**
+
+✅ **Team Collaboration**: Multiple developers can work safely  
+✅ **State Locking**: Prevents concurrent modifications  
+✅ **Disaster Recovery**: Version history for rollback  
+✅ **Security**: Encrypted state files
+
+> ⚠️ **Important**: Always back up your state file before destructive operations!
+
+---
+
+## 🔄 CI/CD Integration
+
+### **GitHub Actions Workflow**
+
+The repository includes GitHub Actions for automated infrastructure validation and deployment.
+
+**Workflow Triggers:**
+- Push to `main` branch
+- Pull requests to `main` branch
+- Manual workflow dispatch
+
+**Workflow Steps:**
+1. Checkout code
+2. Configure AWS credentials
+3. Initialize Terraform
+4. Validate Terraform syntax
+5. Plan infrastructure changes
+6. Apply changes (on merge to main)
+
+### **Branch Protection**
+
+- **Required Reviews**: At least 1 approver
+- **Status Checks**: Terraform validation must pass
+- **Up-to-date**: Branch must be up-to-date before merging
+
+---
+
+## 🧹 Resource Cleanup
+
+To avoid AWS charges, follow these steps to completely destroy all resources:
+
+### **Step-by-Step Cleanup Guide**
+
+#### **1. Remove Kubernetes Configuration**
 
 ```bash
 rm -rf ~/.kube/config
 ```
-- **Purpose**: Removes the local Kubernetes configuration file.
-- **Why Needed**: Clears cached or outdated Kubernetes cluster configurations from your local machine.
+- **Purpose**: Clears cached Kubernetes cluster configurations
 
-### 2. Update Kubernetes Configuration for EKS
+#### **2. Update kubeconfig for EKS**
 
 ```bash
-aws eks update-kubeconfig --region <region-name> --name <eks-cluster-name>  
+aws eks update-kubeconfig --region <region-name> --name <eks-cluster-name>
 ```
-- **Purpose**: Reconnects your local system to the EKS cluster.
-- **Why Needed**: Ensures `kubectl` can communicate with the cluster to delete resources.
+- **Purpose**: Reconnects to EKS cluster for resource cleanup
 
-### 3. Delete the Ingress Controller
+#### **3. Delete Ingress Controller (if installed)**
 
 ```bash
 kubectl delete -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.7.0/deploy/static/provider/aws/deploy.yaml
 ```
-- **Purpose**: Deletes the NGINX ingress controller from the EKS cluster.
-- **Why Needed**: Removes the ingress controller used for routing traffic to applications.
+- **Purpose**: Removes NGINX ingress controller and associated load balancers
 
-### 4. Uninstall the Helm Deployment
+#### **4. Uninstall Helm Releases (if any)**
 
 ```bash
-helm uninstall vprofile-stack
+helm list --all-namespaces
+helm uninstall <release-name> -n <namespace>
 ```
-- **Purpose**: Uninstalls the Helm release named `vprofile-stack`.
-- **Why Needed**: Deletes all resources associated with the Helm chart used for deploying the application.
+- **Purpose**: Removes all Helm-deployed applications
 
-### 5. Navigate to the Terraform Directory
+#### **5. Navigate to Terraform Directory**
 
 ```bash
 cd terraform/
 ```
-- **Purpose**: Changes the directory to the Terraform configuration folder.
-- **Why Needed**: Ensures Terraform commands are executed in the correct directory.
 
-### 6. Reinitialize Terraform
+#### **6. Reinitialize Terraform**
 
 ```bash
-terraform init -backend-config="bucket=<s3-bucket-name>" -backend-config="region=<region-name>" -backend-config="key=terraform.tfstate"
+terraform init \
+  -backend-config="bucket=<s3-bucket-name>" \
+  -backend-config="region=<region-name>" \
+  -backend-config="key=terraform.tfstate"
 ```
-- **Purpose**: Reinitializes Terraform with the backend configuration.
-- **Why Needed**: Ensures Terraform can communicate with the S3 bucket storing the state file.
+- **Purpose**: Ensures Terraform can access the state file
 
-### 7. Destroy All Terraform-Managed Resources
+#### **7. Destroy All Infrastructure**
 
 ```bash
 terraform destroy -auto-approve
 ```
-- **Purpose**: Deletes all infrastructure resources defined in the Terraform configuration.
-- **Why Needed**: Cleans up AWS resources (e.g., VPCs, EKS clusters, S3 buckets) to avoid incurring unnecessary costs.
+- **Purpose**: Deletes all Terraform-managed AWS resources
 
-## Important Notes
+### **⚠️ Important Notes**
 
-- **Backup State Files**: Before running `terraform destroy`, back up your state file if you need to restore the infrastructure later.
-- **Deletion Confirmation**: Review the resources managed by Terraform to confirm no unintended resources will be destroyed.
-- **Costs**: Removing resources ensures you don't incur costs for unused infrastructure.
+- **Backup State**: Save your state file before destruction
+- **Review Resources**: Use `terraform plan -destroy` to preview deletions
+- **Cost Savings**: Complete cleanup prevents unnecessary AWS charges
+- **Data Loss**: This operation is irreversible!
 
-By following these steps, you can safely and completely remove all resources related to this project.
+---
 
+## 🔐 GitHub Secrets Configuration
 
-## Repository Secrets Setup for GitHub Actions
+To enable GitHub Actions workflows, configure the following repository secrets:
 
-This repository uses GitHub Actions to automate tasks like testing, building, and deploying the application. To ensure the workflow runs successfully, you must configure the following repository secrets. These secrets store sensitive information and are used during the workflow execution.
+| Secret Name | Description | Example |
+|-------------|-------------|---------|
+| `AWS_ACCESS_KEY_ID` | AWS IAM access key for authentication | `AKIAEXAMPLEID` |
+| `AWS_SECRET_ACCESS_KEY` | AWS IAM secret key | `wJalrXUtnFEMI/K7MDENG/bPxRfiCY...` |
+| `BUCKET_TF_STATE` | S3 bucket name for Terraform state | `my-terraform-state-bucket` |
+| `REGISTRY` | AWS ECR registry URL (for deployment branch) | `123456789012.dkr.ecr.us-east-1.amazonaws.com` |
+| `SONAR_ORGANIZATION` | SonarCloud organization (for deployment branch) | `my-org` |
+| `SONAR_PROJECT_KEY` | SonarCloud project key (for deployment branch) | `vproapp0100` |
+| `SONAR_TOKEN` | SonarCloud authentication token (for deployment branch) | `a12b34c56d78...` |
+| `SONAR_URL` | SonarCloud URL (for deployment branch) | `https://sonarcloud.io` |
 
-### Required Secrets
+### **How to Add Secrets**
 
-| Secret Name           | Purpose                                                                                 | Example Value                                    |
-|-----------------------|-----------------------------------------------------------------------------------------|------------------------------------------------|
-| `AWS_ACCESS_KEY_ID`   | Used to authenticate with AWS services (e.g., ECR, EKS).                                | `AKIAEXAMPLEID`                                |
-| `AWS_SECRET_ACCESS_KEY` | Used alongside the `AWS_ACCESS_KEY_ID` for secure AWS authentication.                 | `wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY`     |
-| `BUCKET_TF_STATE`     | The name of the AWS S3 bucket used to store Terraform state files.                      | `my-terraform-bucket`                          |
-| `REGISTRY`            | The AWS ECR registry URL where Docker images are stored.                               | `123456789012.dkr.ecr.us-east-1.amazonaws.com` |
-| `SONAR_ORGANIZATION`  | Identifies the organization in SonarCloud where the project is hosted.                  | `my-sonar-org`                                 |
-| `SONAR_PROJECT_KEY`   | The unique key of your SonarCloud project.                                              | `vproapp0100`                                  |
-| `SONAR_TOKEN`         | Authentication token for accessing SonarCloud services.                                 | `a12b34c56d78e9f01g2h34i567j89k01`            |
-| `SONAR_URL`           | The base URL for SonarCloud.                                                           | `https://sonarcloud.io`                        |
+1. Navigate to your GitHub repository
+2. Go to **Settings** → **Secrets and variables** → **Actions**
+3. Click **New repository secret**
+4. Enter the **Name** and **Value**
+5. Click **Add secret**
 
-### How to Add Secrets to Your Repository
+📚 [GitHub Secrets Documentation](https://docs.github.com/en/actions/security-guides/encrypted-secrets)
 
-Follow these steps to configure the secrets:
+---
 
-1. Go to your GitHub repository.
-2. Navigate to **Settings** > **Secrets and variables** > **Actions**.
-3. Click **New repository secret** for each secret listed above.
-4. Enter the **Name** (e.g., `AWS_ACCESS_KEY_ID`) and its corresponding **Value**.
-5. Save the secret.
+## 🔧 Troubleshooting
 
-### Note for Collaborators
+### **Common Issues and Solutions**
 
-If you fork or clone this repository, ensure that you add the above secrets to your forked repository to successfully run the workflows. Without these secrets, the workflow will fail during execution. Each secret must be set up with valid credentials or tokens specific to your environment.
+<details>
+<summary><b>Issue: Terraform state lock error</b></summary>
 
-For more details about setting up secrets in GitHub Actions, refer to the [official GitHub documentation](https://docs.github.com/en/actions/security-guides/encrypted-secrets).
+**Error**: `Error: Error acquiring the state lock`
 
+**Solution**:
+```bash
+# Force unlock (use with caution!)
+terraform force-unlock <lock-id>
+```
+</details>
 
+<details>
+<summary><b>Issue: AWS credentials not configured</b></summary>
 
+**Error**: `No valid credential sources found`
 
+**Solution**:
+```bash
+# Reconfigure AWS CLI
+aws configure
+
+# Or export credentials
+export AWS_ACCESS_KEY_ID="your-key"
+export AWS_SECRET_ACCESS_KEY="your-secret"
+export AWS_DEFAULT_REGION="us-east-2"
+```
+</details>
+
+<details>
+<summary><b>Issue: EKS cluster unreachable</b></summary>
+
+**Error**: `The connection to the server localhost:8080 was refused`
+
+**Solution**:
+```bash
+# Update kubeconfig
+aws eks update-kubeconfig --region <region> --name <cluster-name>
+
+# Verify configuration
+kubectl config view
+```
+</details>
+
+<details>
+<summary><b>Issue: Insufficient IAM permissions</b></summary>
+
+**Error**: `UnauthorizedOperation` or `AccessDenied`
+
+**Solution**:
+- Verify your IAM user/role has necessary permissions
+- Attach required policies: `AmazonEKSClusterPolicy`, `AmazonVPCFullAccess`
+- Check AWS CloudTrail for detailed error logs
+</details>
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please follow these guidelines:
+
+1. **Fork** the repository
+2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
+3. **Commit** your changes (`git commit -m 'Add amazing feature'`)
+4. **Push** to the branch (`git push origin feature/amazing-feature`)
+5. **Open** a Pull Request
+
+### **Code Standards**
+
+- Follow Terraform best practices
+- Run `terraform fmt` before committing
+- Include meaningful commit messages
+- Update documentation for new features
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 📞 Contact
+
+**Ammar Abdelhady**
+
+- GitHub: [@Ammar-Abdelhady-ai](https://github.com/Ammar-Abdelhady-ai)
+- Repository: [GitOps](https://github.com/Ammar-Abdelhady-ai/GitOps)
+
+---
+
+<div align="center">
+
+**Made with ❤️ for the DevOps Community**
+
+⭐ Star this repository if you found it helpful!
+
+</div>
